@@ -161,7 +161,7 @@ async def websocket_chat(websocket: WebSocket, session_id: UUID):
         pass
 
 
-async def get_db_session():
+def get_db_session():
     """Helper to get a DB session outside of dependency injection."""
     from app.database import async_session
     return async_session()

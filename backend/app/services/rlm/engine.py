@@ -45,7 +45,7 @@ class RLMEngine:
                 response = await self.client.chat.completions.create(
                     model=self.sub_model,
                     messages=messages,
-                    max_tokens=2000,
+                    max_completion_tokens=2000,
                 )
                 return response.choices[0].message.content
 
@@ -80,7 +80,7 @@ class RLMEngine:
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=history,
-                max_tokens=4000,
+                max_completion_tokens=4000,
             )
             assistant_msg = response.choices[0].message.content
             history.append({"role": "assistant", "content": assistant_msg})
