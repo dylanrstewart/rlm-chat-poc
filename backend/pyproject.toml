@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/__init__.py",
+    "app/services/clustering.py",  # Requires BERTopic (native deps, Docker-only)
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
