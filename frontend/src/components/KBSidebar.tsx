@@ -89,14 +89,14 @@ export function KBSidebar() {
   };
 
   return (
-    <aside className="bg-gray-50 border-r border-gray-200 flex flex-col h-full overflow-hidden">
-      <div className="p-3 border-b border-gray-200">
+    <aside className="bg-cyber-surface/80 backdrop-blur-sm flex flex-col h-full overflow-hidden">
+      <div className="p-3 border-b border-cyber-cyan/20">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
-            Knowledge Bases
+          <h2 className="font-orbitron text-xs font-bold text-cyber-cyan uppercase tracking-widest text-glow-cyan">
+            Data Vaults
           </h2>
           <button
-            className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-500"
+            className="text-xs px-2 py-1 bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/40 rounded hover:bg-cyber-cyan/30 font-mono transition-all"
             onClick={() => setShowCreate(!showCreate)}
           >
             + New
@@ -105,22 +105,22 @@ export function KBSidebar() {
         {showCreate && (
           <div className="space-y-2 mb-2">
             <input
-              className="w-full px-2 py-1 border rounded text-sm"
-              placeholder="Name"
+              className="w-full px-2 py-1.5 bg-cyber-deep border border-cyber-cyan/30 rounded text-sm text-cyber-text font-mono focus:outline-none focus:border-cyber-cyan placeholder:text-cyber-muted"
+              placeholder="// vault_name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
-              className="w-full px-2 py-1 border rounded text-sm"
-              placeholder="Description (optional)"
+              className="w-full px-2 py-1.5 bg-cyber-deep border border-cyber-cyan/30 rounded text-sm text-cyber-text font-mono focus:outline-none focus:border-cyber-cyan placeholder:text-cyber-muted"
+              placeholder="// description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
             <button
-              className="w-full text-sm py-1 bg-blue-600 text-white rounded hover:bg-blue-500"
+              className="w-full text-sm py-1.5 bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/40 rounded hover:bg-cyber-cyan/30 font-mono uppercase tracking-wider transition-all"
               onClick={handleCreate}
             >
-              Create
+              Initialize Vault
             </button>
           </div>
         )}
@@ -130,39 +130,39 @@ export function KBSidebar() {
         {knowledgeBases.map((kb) => (
           <div
             key={kb.id}
-            className={`p-2 rounded cursor-pointer text-sm group ${
+            className={`p-2.5 rounded cursor-pointer text-sm group font-mono transition-all ${
               selectedKB?.id === kb.id
-                ? "bg-blue-100 border border-blue-300"
-                : "hover:bg-gray-100"
+                ? "bg-cyber-cyan/15 border border-cyber-cyan/40 glow-cyan"
+                : "border border-transparent hover:border-cyber-cyan/20 hover:bg-cyber-cyan/5"
             }`}
             onClick={() => setSelectedKB(kb)}
           >
             <div className="flex items-center justify-between">
-              <span className="font-medium truncate">{kb.name}</span>
+              <span className="text-cyber-text truncate">{kb.name}</span>
               <button
-                className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 text-xs"
+                className="text-cyber-pink hover:text-cyber-pink opacity-0 group-hover:opacity-100 text-xs font-mono transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteKB(kb);
                 }}
               >
-                Del
+                [DEL]
               </button>
             </div>
             {kb.description && (
-              <p className="text-xs text-gray-500 truncate">{kb.description}</p>
+              <p className="text-xs text-cyber-muted truncate mt-0.5">{kb.description}</p>
             )}
           </div>
         ))}
       </div>
 
       {selectedKB && (
-        <div className="border-t border-gray-200 p-3 space-y-2">
+        <div className="border-t border-cyber-cyan/20 p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-600 uppercase">
+            <span className="text-xs font-orbitron font-bold text-cyber-green uppercase tracking-wider">
               Files ({files.length})
             </span>
-            <label className="text-xs px-2 py-1 bg-green-600 text-white rounded cursor-pointer hover:bg-green-500">
+            <label className="text-xs px-2 py-1 bg-cyber-green/20 text-cyber-green border border-cyber-green/40 rounded cursor-pointer hover:bg-cyber-green/30 font-mono transition-all">
               {uploading ? "Uploading..." : "Upload"}
               <input
                 type="file"
@@ -176,10 +176,10 @@ export function KBSidebar() {
             {files.map((f) => (
               <div
                 key={f.id}
-                className="text-xs bg-white p-1.5 rounded border flex justify-between items-center"
+                className="text-xs bg-cyber-deep/80 p-2 rounded border border-cyber-cyan/10 flex justify-between items-center font-mono"
               >
-                <span className="truncate">{f.filename}</span>
-                <span className="text-gray-400 ml-1 shrink-0">
+                <span className="truncate text-cyber-text">{f.filename}</span>
+                <span className="text-cyber-muted ml-1 shrink-0">
                   {f.chunk_count}ch
                 </span>
               </div>
@@ -187,11 +187,11 @@ export function KBSidebar() {
           </div>
 
           <button
-            className="w-full text-xs py-1 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50"
+            className="w-full text-xs py-1.5 bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/40 rounded hover:bg-cyber-purple/30 font-mono uppercase tracking-wider disabled:opacity-30 transition-all"
             onClick={handleCluster}
             disabled={clustering || files.length === 0}
           >
-            {clustering ? "Clustering..." : "Cluster Topics"}
+            {clustering ? "Analyzing..." : "Cluster Topics"}
           </button>
 
           {topics.length > 0 && (
@@ -199,7 +199,7 @@ export function KBSidebar() {
               {topics.map((t) => (
                 <span
                   key={t.id}
-                  className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded"
+                  className="text-xs bg-cyber-purple/15 text-cyber-purple border border-cyber-purple/30 px-2 py-0.5 rounded font-mono"
                 >
                   {t.topic_label.split("_").slice(1, 3).join(" ")} ({t.doc_count})
                 </span>

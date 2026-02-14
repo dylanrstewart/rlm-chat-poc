@@ -123,22 +123,22 @@ export function ChatPanel() {
   }, [input, currentSession, currentUser, connected, isLoading]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-cyber-deep/50">
       {/* Session tabs */}
-      <div className="border-b border-gray-200 px-3 py-2 flex items-center gap-2 overflow-x-auto bg-white">
+      <div className="border-b border-cyber-cyan/20 px-3 py-2 flex items-center gap-2 overflow-x-auto bg-cyber-surface/50 backdrop-blur-sm">
         <button
-          className="text-xs px-2 py-1 bg-blue-600 text-white rounded shrink-0 hover:bg-blue-500"
+          className="text-xs px-3 py-1.5 bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/40 rounded hover:bg-cyber-pink/30 shrink-0 font-mono uppercase tracking-wider transition-all"
           onClick={handleNewSession}
         >
-          + New Chat
+          + New Session
         </button>
         {chatSessions.map((s) => (
           <button
             key={s.id}
-            className={`text-xs px-2 py-1 rounded shrink-0 ${
+            className={`text-xs px-3 py-1.5 rounded shrink-0 font-mono transition-all ${
               currentSession?.id === s.id
-                ? "bg-blue-100 text-blue-700 border border-blue-300"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50 glow-cyan"
+                : "text-cyber-muted border border-transparent hover:border-cyber-cyan/20 hover:text-cyber-text"
             }`}
             onClick={() => setCurrentSession(s)}
           >
@@ -150,8 +150,8 @@ export function ChatPanel() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {!currentSession && (
-          <div className="text-center text-gray-400 mt-20">
-            Create a new chat session to start
+          <div className="text-center text-cyber-muted mt-20 font-mono">
+            <span className="text-glow-cyan text-cyber-cyan">&gt;</span> Initialize a new session to begin_
           </div>
         )}
         {messages
@@ -164,14 +164,14 @@ export function ChatPanel() {
               }`}
             >
               <div
-                className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${
+                className={`max-w-[80%] px-4 py-2.5 rounded text-sm font-mono ${
                   msg.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-800"
+                    ? "bg-cyber-pink/15 text-cyber-text border border-cyber-pink/30 cyber-clip"
+                    : "bg-cyber-surface border border-cyber-cyan/20 text-cyber-text"
                 }`}
               >
                 {msg.role === "assistant" ? (
-                  <ReactMarkdown className="prose prose-sm max-w-none">
+                  <ReactMarkdown className="prose prose-sm prose-invert max-w-none prose-cyber">
                     {msg.content}
                   </ReactMarkdown>
                 ) : (
@@ -182,8 +182,8 @@ export function ChatPanel() {
           ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-500 animate-pulse">
-              Thinking...
+            <div className="bg-cyber-surface border border-cyber-cyan/30 px-4 py-2.5 rounded text-sm text-cyber-cyan font-mono animate-neon-pulse">
+              &gt; processing query...
             </div>
           </div>
         )}
@@ -191,14 +191,14 @@ export function ChatPanel() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 p-3 bg-white">
+      <div className="border-t border-cyber-cyan/20 p-3 bg-cyber-surface/50 backdrop-blur-sm">
         <div className="flex gap-2">
           <input
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2.5 bg-cyber-deep border border-cyber-cyan/30 rounded text-sm text-cyber-text font-mono focus:outline-none focus:border-cyber-cyan glow-cyan placeholder:text-cyber-muted transition-all"
             placeholder={
               currentSession
-                ? "Type a message..."
-                : "Create a session first"
+                ? "> enter query..."
+                : "> no active session"
             }
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -206,11 +206,11 @@ export function ChatPanel() {
             disabled={!currentSession || isLoading}
           />
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50"
+            className="px-5 py-2.5 bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50 rounded text-sm font-mono uppercase tracking-wider hover:bg-cyber-cyan/30 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
             onClick={handleSend}
             disabled={!currentSession || !input.trim() || isLoading}
           >
-            Send
+            Transmit
           </button>
         </div>
       </div>
