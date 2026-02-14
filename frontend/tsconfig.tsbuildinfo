@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/test-setup.ts","./src/components/AppLayout.tsx","./src/components/ChatPanel.tsx","./src/components/Header.tsx","./src/components/KBSidebar.tsx","./src/components/ReplLogPanel.tsx","./src/hooks/useApi.ts","./src/hooks/useWebSocket.ts","./src/lib/api.ts","./src/store/appStore.ts","./src/types/index.ts"],"version":"5.9.3"}
