@@ -5,10 +5,11 @@ import { ChatPanel } from "./ChatPanel";
 import { ReplLogPanel } from "./ReplLogPanel";
 import { FilePanel } from "./FilePanel";
 import { SettingsPanel } from "./SettingsPanel";
+import { HackingPanel } from "./HackingPanel";
 import { soundEngine } from "../audio/soundEngine";
 import { useSound } from "../audio/useSound";
 
-type NavTab = "chat" | "files" | "logs" | "settings";
+type NavTab = "chat" | "files" | "logs" | "hack" | "settings";
 
 export function AppLayout() {
   const [activeTab, setActiveTab] = useState<NavTab>("chat");
@@ -55,6 +56,13 @@ export function AppLayout() {
             <span className="text-terminal-amber-dim text-[11px]">(View)</span>
           </button>
           <button
+            className={`nav-btn ${activeTab === "hack" ? "active" : ""}`}
+            onClick={() => switchTab("hack")}
+          >
+            Terminal Hack<br />
+            <span className="text-terminal-amber-dim text-[11px]">(Game)</span>
+          </button>
+          <button
             className={`nav-btn ${activeTab === "settings" ? "active" : ""}`}
             onClick={() => switchTab("settings")}
           >
@@ -67,19 +75,24 @@ export function AppLayout() {
           {activeTab === "chat" && <ChatPanel />}
           {activeTab === "files" && <KBSidebar />}
           {activeTab === "logs" && <ReplLogPanel />}
+          {activeTab === "hack" && <HackingPanel />}
           {activeTab === "settings" && <SettingsPanel />}
         </main>
 
-        {/* Right panel — file explorer (always visible) */}
-        <aside className="w-[280px] shrink-0 bg-terminal-bg t-border flex flex-col overflow-hidden" style={{ borderLeft: '1px solid #5a5a2e' }}>
-          <FilePanel />
-        </aside>
+        {/* Right panel — file explorer (hidden during hack tab) */}
+        {activeTab !== "hack" && (
+          <aside className="w-[280px] shrink-0 bg-terminal-bg t-border flex flex-col overflow-hidden" style={{ borderLeft: '1px solid #5a5a2e' }}>
+            <FilePanel />
+          </aside>
+        )}
       </div>
 
-      {/* Bottom — system activity log */}
-      <div className="h-[140px] shrink-0 bg-terminal-dark t-border-t overflow-hidden">
-        <ReplLogPanel compact />
-      </div>
+      {/* Bottom — system activity log (hidden during hack tab) */}
+      {activeTab !== "hack" && (
+        <div className="h-[140px] shrink-0 bg-terminal-dark t-border-t overflow-hidden">
+          <ReplLogPanel compact />
+        </div>
+      )}
     </div>
   );
 }

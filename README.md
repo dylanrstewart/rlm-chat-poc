@@ -64,11 +64,12 @@ npm test         # Run vitest
 
 ## UI Overview
 
-The frontend uses a RobCo Unified Operating System / Pip-Boy CRT terminal theme with amber phosphor styling. Navigation is organized into four tabs:
+The frontend uses a RobCo Unified Operating System / Pip-Boy CRT terminal theme with amber phosphor styling. Navigation is organized into five tabs:
 
 - **Communications (Chat)** — Chat sessions with the RLM, real-time REPL step streaming via WebSocket
 - **Data Storage (Files)** — Knowledge base management, file uploads, BERTopic clustering
 - **System Logs (View)** — Live REPL execution log showing LLM-generated code and output
+- **Terminal Hack (Game)** — Fallout-style terminal hacking minigame (see below)
 - **Settings** — User profile, system info, audio toggle
 
 ### Audio
@@ -85,6 +86,29 @@ UI interactions are accompanied by authentic Fallout 3/New Vegas Pip-Boy sound e
 | REPL step execution | Hacking terminal chars | `ui_hacking_charsingle_01-06.wav` (cycling) |
 
 Audio can be toggled on/off in the Settings panel. Mute state persists across sessions via localStorage.
+
+### Terminal Hacking Minigame
+
+A playable recreation of the Fallout terminal hacking minigame, available as the "Terminal Hack" tab. Pure frontend — no backend required.
+
+**How to play:**
+
+1. Select a difficulty (Novice, Advanced, Expert, or Master)
+2. A hex dump grid appears with words embedded among random ASCII garbage
+3. Hover over characters to highlight words and bracket groups
+4. Click a word to guess — feedback shows `Likeness=N` (letters matching the correct password at the exact same position)
+5. You have 4 attempts. Use likeness feedback to narrow down the answer
+6. Click matched bracket pairs (`()`, `[]`, `{}`, `<>`) in the garbage for a bonus: 60% chance to remove a dud word, 40% chance to reset attempts to 4
+7. Correct guess = ACCESS GRANTED, out of attempts = TERMINAL LOCKED
+
+**Difficulty levels:**
+
+| Level | Word Length | Words on Screen |
+|-------|-----------|-----------------|
+| Novice | 4 letters | 14–18 |
+| Advanced | 5–6 letters | 16–22 |
+| Expert | 7–8 letters | 18–24 |
+| Master | 9–12 letters | 16–22 |
 
 ## API Endpoints
 
@@ -155,11 +179,15 @@ frontend/
 │   │   ├── AppLayout.tsx     # Main layout with nav tabs + AudioContext resume
 │   │   ├── ChatPanel.tsx     # Chat sessions, messages, WebSocket integration
 │   │   ├── FilePanel.tsx     # File explorer sidebar
+│   │   ├── HackingPanel.tsx  # Terminal hacking minigame UI
 │   │   ├── Header.tsx        # User selector + create
 │   │   ├── KBSidebar.tsx     # Knowledge base CRUD, upload, clustering
 │   │   ├── ReplLogPanel.tsx  # Live REPL execution viewer
 │   │   └── SettingsPanel.tsx # Settings + audio mute toggle
+│   ├── data/
+│   │   └── hackingWords.ts   # Word lists + difficulty config for hacking game
 │   ├── hooks/
+│   │   ├── useHackingGame.ts # Game logic hook (reducer, puzzle gen, bracket tricks)
 │   │   ├── useWebSocket.ts   # WebSocket connection for REPL streaming
 │   │   └── useApi.ts         # API request hook
 │   ├── store/appStore.ts     # Zustand state (users, KBs, files, chat, audio)
