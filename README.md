@@ -1,6 +1,6 @@
 # RLM Chat POC
 
-A proof-of-concept Recursive Language Model (RLM) platform. Upload documents, organize into knowledge bases, and query using an RLM-powered chat where the LLM autonomously writes Python code to retrieve and process your data.
+A proof-of-concept Recursive Language Model (RLM) platform with a Fallout Pip-Boy terminal aesthetic. Upload documents, organize into knowledge bases, and query using an RLM-powered chat where the LLM autonomously writes Python code to retrieve and process your data.
 
 ## Architecture
 
@@ -12,9 +12,10 @@ React UI  ──WS──►  FastAPI  ──►  RLM Engine (Python REPL)
 ```
 
 - **Backend**: FastAPI + SQLAlchemy async + RLM REPL engine
-- **Frontend**: React + Vite + Tailwind + Zustand
+- **Frontend**: React + Vite + Tailwind + Zustand (RobCo terminal theme)
 - **Vector DB**: Milvus (with etcd + MinIO)
 - **Database**: PostgreSQL 16 with pg_trgm + FTS
+- **Audio**: Pip-Boy sound effects via Web Audio API (Fallout 3/NV sound pack)
 
 ## Quick Start
 
@@ -49,6 +50,8 @@ pytest tests/ -v
 pytest tests/ --cov=app --cov-report=term-missing
 ```
 
+Note: BERTopic and its native dependencies (hdbscan, umap-learn) only install in Docker. Use `requirements-core.txt` for local development without clustering support.
+
 ### Frontend
 
 ```bash
@@ -58,6 +61,30 @@ npm run dev      # Dev server on :3000
 npm run build    # Production build
 npm test         # Run vitest
 ```
+
+## UI Overview
+
+The frontend uses a RobCo Unified Operating System / Pip-Boy CRT terminal theme with amber phosphor styling. Navigation is organized into four tabs:
+
+- **Communications (Chat)** — Chat sessions with the RLM, real-time REPL step streaming via WebSocket
+- **Data Storage (Files)** — Knowledge base management, file uploads, BERTopic clustering
+- **System Logs (View)** — Live REPL execution log showing LLM-generated code and output
+- **Settings** — User profile, system info, audio toggle
+
+### Audio
+
+UI interactions are accompanied by authentic Fallout 3/New Vegas Pip-Boy sound effects loaded from `frontend/public/sounds/`. Sounds are decoded into `AudioBuffer`s on first user interaction and played through a `GainNode` chain via the Web Audio API.
+
+| Action | Sound | Source |
+|--------|-------|--------|
+| Tab/vault/session switch | Navigation click | `deck_ui_navigation.wav` |
+| Create user/vault, upload/cluster success | Confirmation | `deck_ui_default_activation.wav` |
+| Send message, start upload/cluster | Transition | `deck_ui_into_game_detail.wav` |
+| Receive AI response | Toast notification | `deck_ui_toast.wav` |
+| Error, delete action | Warning bumper | `deck_ui_bumper_end_02.wav` |
+| REPL step execution | Hacking terminal chars | `ui_hacking_charsingle_01-06.wav` (cycling) |
+
+Audio can be toggled on/off in the Settings panel. Mute state persists across sessions via localStorage.
 
 ## API Endpoints
 
@@ -103,26 +130,42 @@ backend/
 │   ├── main.py              # FastAPI app + routers
 │   ├── config.py            # Settings from env vars
 │   ├── database.py          # Async SQLAlchemy
-│   ├── models.py            # ORM models
-│   ├── routers/             # API endpoints
+│   ├── models.py            # ORM models (portable types for SQLite test compat)
+│   ├── routers/             # API endpoints (users, KBs, files, chat, topics)
 │   ├── services/
 │   │   ├── embedding.py     # OpenAI embeddings
 │   │   ├── milvus_service.py
-│   │   ├── ingest.py        # Document pipeline
-│   │   ├── clustering.py    # BERTopic
-│   │   └── rlm/             # RLM engine + tools
-│   ├── repositories/        # Data access layer
-│   ├── schemas/             # Pydantic schemas
-│   └── utils/               # Chunking, text extraction
-├── tests/                   # 104 tests, 80%+ coverage
-└── init.sql                 # PostgreSQL schema
+│   │   ├── ingest.py        # Document ingest pipeline
+│   │   ├── clustering.py    # BERTopic topic extraction
+│   │   └── rlm/             # RLM engine, tools, session manager, prompts
+│   ├── repositories/        # Data access layer (repository pattern)
+│   ├── schemas/             # Pydantic request/response schemas
+│   └── utils/               # Text extraction, chunking
+├── tests/                   # 104 tests, 80%+ coverage (SQLite in-memory)
+└── init.sql                 # PostgreSQL schema (extensions, FTS, trigram indexes)
 
 frontend/
+├── public/
+│   └── sounds/              # Pip-Boy wav files (Fallout 3/NV sound pack)
 ├── src/
-│   ├── components/          # React components
-│   ├── hooks/               # useWebSocket, useApi
-│   ├── store/               # Zustand state
-│   ├── lib/api.ts           # Typed API client
-│   └── types/               # TypeScript types
+│   ├── audio/
+│   │   ├── soundEngine.ts   # Web Audio API sample loader + playback
+│   │   └── useSound.ts      # React hook + standalone playIfUnmuted helper
+│   ├── components/
+│   │   ├── AppLayout.tsx     # Main layout with nav tabs + AudioContext resume
+│   │   ├── ChatPanel.tsx     # Chat sessions, messages, WebSocket integration
+│   │   ├── FilePanel.tsx     # File explorer sidebar
+│   │   ├── Header.tsx        # User selector + create
+│   │   ├── KBSidebar.tsx     # Knowledge base CRUD, upload, clustering
+│   │   ├── ReplLogPanel.tsx  # Live REPL execution viewer
+│   │   └── SettingsPanel.tsx # Settings + audio mute toggle
+│   ├── hooks/
+│   │   ├── useWebSocket.ts   # WebSocket connection for REPL streaming
+│   │   └── useApi.ts         # API request hook
+│   ├── store/appStore.ts     # Zustand state (users, KBs, files, chat, audio)
+│   ├── lib/api.ts            # Typed API client
+│   └── types/index.ts        # TypeScript type definitions
 └── index.html
+
+sounds/                       # Source Pip-Boy sound pack (Fallout 3/NV)
 ```
