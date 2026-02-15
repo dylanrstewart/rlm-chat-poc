@@ -10,6 +10,8 @@ interface WSMessage {
   has_answer?: boolean;
 }
 
+const MAX_QUEUE_SIZE = 50;
+
 export function useWebSocket(sessionId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -17,6 +19,51 @@ export function useWebSocket(sessionId: string | null) {
   const onReplStep = useRef<((step: ReplStep) => void) | null>(null);
   const onAnswer = useRef<((answer: string) => void) | null>(null);
   const onError = useRef<((error: string) => void) | null>(null);
+
+  const pendingQueue = useRef<WSMessage[]>([]);
+
+  const dispatch = useCallback((msg: WSMessage) => {
+    if (msg.type === "repl_step") {
+      if (onReplStep.current) {
+        onReplStep.current({
+          iteration: msg.iteration ?? 0,
+          code: msg.code ?? "",
+          output: msg.output ?? "",
+          has_answer: msg.has_answer ?? false,
+        });
+      } else if (pendingQueue.current.length < MAX_QUEUE_SIZE) {
+        pendingQueue.current.push(msg);
+      }
+    } else if (msg.type === "answer") {
+      if (onAnswer.current) {
+        onAnswer.current(msg.content ?? "");
+      } else if (pendingQueue.current.length < MAX_QUEUE_SIZE) {
+        pendingQueue.current.push(msg);
+      }
+    } else if (msg.type === "error") {
+      if (onError.current) {
+        onError.current(msg.content ?? "Unknown error");
+      } else if (pendingQueue.current.length < MAX_QUEUE_SIZE) {
+        pendingQueue.current.push(msg);
+      }
+    } else {
+      console.warn("[useWebSocket] unhandled message type", msg);
+    }
+  }, []);
+
+  const flush = useCallback(() => {
+    const queued = pendingQueue.current.splice(0);
+    if (queued.length > 0) {
+      console.info(`[useWebSocket] flushing ${queued.length} queued message(s)`);
+    }
+    for (const msg of queued) {
+      dispatch(msg);
+    }
+  }, [dispatch]);
+
+  const clearQueue = useCallback(() => {
+    pendingQueue.current = [];
+  }, []);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -31,19 +78,7 @@ export function useWebSocket(sessionId: string | null) {
 
     ws.onmessage = (event) => {
       const msg: WSMessage = JSON.parse(event.data);
-
-      if (msg.type === "repl_step" && onReplStep.current) {
-        onReplStep.current({
-          iteration: msg.iteration ?? 0,
-          code: msg.code ?? "",
-          output: msg.output ?? "",
-          has_answer: msg.has_answer ?? false,
-        });
-      } else if (msg.type === "answer" && onAnswer.current) {
-        onAnswer.current(msg.content ?? "");
-      } else if (msg.type === "error" && onError.current) {
-        onError.current(msg.content ?? "Unknown error");
-      }
+      dispatch(msg);
     };
 
     // Keepalive ping every 30s to prevent proxy/network timeout
@@ -57,8 +92,9 @@ export function useWebSocket(sessionId: string | null) {
     return () => {
       clearInterval(pingInterval);
       ws.close();
+      pendingQueue.current = [];
     };
-  }, [sessionId]);
+  }, [sessionId, dispatch]);
 
   const sendQuery = useCallback(
     (query: string, userId: string) => {
@@ -75,5 +111,7 @@ export function useWebSocket(sessionId: string | null) {
     onReplStep,
     onAnswer,
     onError,
+    flush,
+    clearQueue,
   };
 }

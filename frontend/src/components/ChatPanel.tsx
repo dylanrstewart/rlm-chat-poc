@@ -26,7 +26,7 @@ export function ChatPanel() {
   const { play } = useSound();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { connected, sendQuery, onReplStep, onAnswer, onError } =
+  const { connected, sendQuery, onReplStep, onAnswer, onError, flush, clearQueue } =
     useWebSocket(currentSession?.id ?? null);
 
   useEffect(() => {
@@ -75,18 +75,42 @@ export function ChatPanel() {
       });
       setIsLoading(false);
       playIfUnmuted("messageReceive");
+      refetchMessages();
     };
     onError.current = (error: string) => {
       setIsLoading(false);
       playIfUnmuted("error");
-      // Refetch in case answer was persisted but WS send failed
-      refetchMessages();
+      // Refetch first so setMessages has canonical data, then append the
+      // synthetic error message (which isn't persisted server-side).
+      refetchMessages().then(() => {
+        useAppStore.getState().addMessage({
+          id: crypto.randomUUID(),
+          session_id: useAppStore.getState().currentSession?.id ?? "",
+          role: "assistant",
+          content: `[!] SYSTEM ERROR: ${error}`,
+          metadata: null,
+          created_at: new Date().toISOString(),
+        });
+      });
     };
-  }, [currentSession, refetchMessages]);
+    flush();
+  }, [currentSession, refetchMessages, flush]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Safety net: if isLoading stays true for >90s, force-clear and refetch
+  useEffect(() => {
+    if (!isLoading) return;
+    const timer = setTimeout(() => {
+      console.warn("[ChatPanel] loading timeout — force-clearing and refetching");
+      setIsLoading(false);
+      clearQueue();
+      refetchMessages();
+    }, 90_000);
+    return () => clearTimeout(timer);
+  }, [isLoading, refetchMessages, clearQueue]);
 
   const handleNewSession = async () => {
     if (!currentUser) return;
