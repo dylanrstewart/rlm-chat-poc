@@ -2,14 +2,17 @@ import { useAppStore } from "../store/appStore";
 import { api } from "../lib/api";
 import type { FileRecord } from "../types";
 import { useState } from "react";
+import { useSound } from "../audio/useSound";
 
 export function FilePanel() {
   const { currentUser, selectedKB, files, setFiles } = useAppStore();
+  const { play } = useSound();
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (fileList: FileList) => {
     if (!selectedKB || !currentUser) return;
     setUploading(true);
+    play("messageSend");
     const res = await api.uploadFiles(
       selectedKB.id,
       currentUser.id,
@@ -17,6 +20,7 @@ export function FilePanel() {
     );
     if (res.success && res.data) {
       setFiles([...files, ...(res.data as FileRecord[])]);
+      play("confirm");
     }
     setUploading(false);
   };
@@ -24,6 +28,7 @@ export function FilePanel() {
   const handleDelete = async (fileId: string) => {
     await api.deleteFile(fileId);
     setFiles(files.filter((f) => f.id !== fileId));
+    play("error");
   };
 
   return (

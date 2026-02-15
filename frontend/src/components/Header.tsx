@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAppStore } from "../store/appStore";
 import type { User } from "../types";
+import { useSound } from "../audio/useSound";
 
 export function Header() {
   const { currentUser, users, setCurrentUser, setUsers } = useAppStore();
+  const { play } = useSound();
   const [newUsername, setNewUsername] = useState("");
   const [showCreate, setShowCreate] = useState(false);
 
@@ -28,6 +30,7 @@ export function Header() {
       setCurrentUser(user);
       setNewUsername("");
       setShowCreate(false);
+      play("confirm");
     }
   };
 
@@ -69,6 +72,7 @@ export function Header() {
               onChange={(e) => {
                 const user = users.find((u) => u.id === e.target.value);
                 setCurrentUser(user ?? null);
+                play("tabClick");
               }}
             >
               {users.length === 0 && <option value="">NO USERS</option>}

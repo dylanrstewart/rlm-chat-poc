@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAppStore } from "../store/appStore";
 import type { FileRecord, KnowledgeBase, Topic } from "../types";
+import { useSound } from "../audio/useSound";
 
 export function KBSidebar() {
   const {
@@ -14,6 +15,7 @@ export function KBSidebar() {
     setFiles,
   } = useAppStore();
 
+  const { play } = useSound();
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -54,12 +56,14 @@ export function KBSidebar() {
       setName("");
       setDescription("");
       setShowCreate(false);
+      play("confirm");
     }
   };
 
   const handleUpload = async (fileList: FileList) => {
     if (!selectedKB || !currentUser) return;
     setUploading(true);
+    play("messageSend");
     const res = await api.uploadFiles(
       selectedKB.id,
       currentUser.id,
@@ -67,6 +71,7 @@ export function KBSidebar() {
     );
     if (res.success && res.data) {
       setFiles([...files, ...(res.data as FileRecord[])]);
+      play("confirm");
     }
     setUploading(false);
   };
@@ -74,9 +79,11 @@ export function KBSidebar() {
   const handleCluster = async () => {
     if (!selectedKB) return;
     setClustering(true);
+    play("messageSend");
     const res = await api.clusterKB(selectedKB.id);
     if (res.success && res.data) {
       setTopics(res.data as Topic[]);
+      play("confirm");
     }
     setClustering(false);
   };
@@ -86,6 +93,7 @@ export function KBSidebar() {
     const updated = knowledgeBases.filter((k) => k.id !== kb.id);
     setKnowledgeBases(updated);
     if (selectedKB?.id === kb.id) setSelectedKB(null);
+    play("error");
   };
 
   return (
@@ -141,7 +149,10 @@ export function KBSidebar() {
                   ? "bg-terminal-amber-faint border-terminal-amber text-glow"
                   : "hover:bg-terminal-amber-faint"
               }`}
-              onClick={() => setSelectedKB(kb)}
+              onClick={() => {
+                if (selectedKB?.id !== kb.id) play("tabClick");
+                setSelectedKB(kb);
+              }}
             >
               <div className="flex items-center justify-between">
                 <span className="uppercase">{kb.name}</span>

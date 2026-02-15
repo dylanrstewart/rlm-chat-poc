@@ -1,0 +1,33 @@
+{
+  "name": "Pip-Boy Sounds (Fallout 3-New Vegas)",
+  "author": "Poptheweasel100",
+  "version": "v1.0",
+  "manifest_version": 2,
+  "music": false,
+  "mappings": {
+    "deck_ui_typing.wav": [
+      "ui_hacking_charsingle_01.wav",
+      "ui_hacking_charsingle_02.wav",
+      "ui_hacking_charsingle_03.wav",
+      "ui_hacking_charsingle_04.wav",
+      "ui_hacking_charsingle_05.wav",
+      "ui_hacking_charsingle_06.wav"
+    ]
+  },
+  "ignore": [
+    "bumper_end.wav",
+    "confirmation_negative.wav",
+    "confirmation_positive.wav",
+    "deck_ui_message_toast.wav",
+    "deck_ui_misc_01.wav",
+    "deck_ui_misc_08.wav",
+    "deck_ui_tile_scroll.wav",
+    "pop_sound.wav",
+    "steam_at_mention.m4a",
+    "steam_chatroom_notification.m4a",
+    "ui_steam_message_old_smooth.m4a",
+    "ui_steam_smoother_friend_join.m4a",
+    "ui_steam_smoother_friend_online.m4a"
+  ],
+  "id": "405747fc-3526-439b-902e-2b2062147655"
+}

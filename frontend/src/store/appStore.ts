@@ -43,6 +43,10 @@ interface AppState {
   // UI State
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+
+  // Audio
+  soundMuted: boolean;
+  setSoundMuted: (muted: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -76,4 +80,10 @@ export const useAppStore = create<AppState>((set) => ({
 
   isLoading: false,
   setIsLoading: (loading) => set({ isLoading: loading }),
+
+  soundMuted: localStorage.getItem("soundMuted") === "true",
+  setSoundMuted: (muted) => {
+    localStorage.setItem("soundMuted", String(muted));
+    set({ soundMuted: muted });
+  },
 }));

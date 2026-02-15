@@ -4,6 +4,8 @@ import { api } from "../lib/api";
 import { useAppStore } from "../store/appStore";
 import type { ChatMessage, ChatSession, ReplStep } from "../types";
 import { useWebSocket } from "../hooks/useWebSocket";
+import { useSound } from "../audio/useSound";
+import { playIfUnmuted } from "../audio/useSound";
 
 export function ChatPanel() {
   const {
@@ -21,6 +23,7 @@ export function ChatPanel() {
     isLoading,
   } = useAppStore();
 
+  const { play } = useSound();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { connected, sendQuery, onReplStep, onAnswer, onError } =
@@ -59,6 +62,7 @@ export function ChatPanel() {
   useEffect(() => {
     onReplStep.current = (step: ReplStep) => {
       addReplStep(step);
+      playIfUnmuted("replStep");
     };
     onAnswer.current = (answer: string) => {
       addMessage({
@@ -70,9 +74,11 @@ export function ChatPanel() {
         created_at: new Date().toISOString(),
       });
       setIsLoading(false);
+      playIfUnmuted("messageReceive");
     };
     onError.current = (error: string) => {
       setIsLoading(false);
+      playIfUnmuted("error");
       // Refetch in case answer was persisted but WS send failed
       refetchMessages();
     };
@@ -89,6 +95,7 @@ export function ChatPanel() {
       const session = res.data as ChatSession;
       setChatSessions([session, ...chatSessions]);
       setCurrentSession(session);
+      play("confirm");
     }
   };
 
@@ -99,6 +106,7 @@ export function ChatPanel() {
     setInput("");
     clearReplSteps();
     setIsLoading(true);
+    play("messageSend");
 
     addMessage({
       id: crypto.randomUUID(),
@@ -159,7 +167,10 @@ export function ChatPanel() {
                   ? "text-terminal-amber-bright bg-terminal-amber-faint t-border text-glow"
                   : "text-terminal-amber-dim hover:text-terminal-amber"
               }`}
-              onClick={() => setCurrentSession(s)}
+              onClick={() => {
+                if (currentSession?.id !== s.id) play("tabClick");
+                setCurrentSession(s);
+              }}
             >
               {s.title ?? "Untitled"}
             </button>

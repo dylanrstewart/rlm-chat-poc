@@ -1,7 +1,10 @@
 import { useAppStore } from "../store/appStore";
+import { useSound } from "../audio/useSound";
+import { soundEngine } from "../audio/soundEngine";
 
 export function SettingsPanel() {
   const { currentUser } = useAppStore();
+  const { play, muted, setMuted } = useSound();
 
   return (
     <div className="flex flex-col h-full p-3">
@@ -19,6 +22,23 @@ export function SettingsPanel() {
           </div>
           <div className="text-terminal-amber-dim">
             USER_ID: <span className="text-terminal-amber">{currentUser?.id ?? "N/A"}</span>
+          </div>
+        </div>
+
+        <div className="t-border p-3 space-y-2">
+          <div className="text-terminal-amber-bright uppercase">Audio</div>
+          <div className="flex items-center gap-3">
+            <span className="text-terminal-amber-dim">TERMINAL_AUDIO:</span>
+            <button
+              className="px-2 py-0.5 t-border text-terminal-amber hover:bg-terminal-amber-faint uppercase"
+              onClick={() => {
+                const wasMuted = muted;
+                setMuted(!muted);
+                if (wasMuted) soundEngine.play("confirm");
+              }}
+            >
+              [{muted ? "DISABLED" : "ENABLED"}]
+            </button>
           </div>
         </div>
 

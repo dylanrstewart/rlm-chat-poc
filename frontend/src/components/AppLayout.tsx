@@ -1,15 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "./Header";
 import { KBSidebar } from "./KBSidebar";
 import { ChatPanel } from "./ChatPanel";
 import { ReplLogPanel } from "./ReplLogPanel";
 import { FilePanel } from "./FilePanel";
 import { SettingsPanel } from "./SettingsPanel";
+import { soundEngine } from "../audio/soundEngine";
+import { useSound } from "../audio/useSound";
 
 type NavTab = "chat" | "files" | "logs" | "settings";
 
 export function AppLayout() {
   const [activeTab, setActiveTab] = useState<NavTab>("chat");
+  const { play } = useSound();
+
+  const switchTab = (tab: NavTab) => {
+    if (tab !== activeTab) {
+      play("tabClick");
+    }
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    const resumeAudio = () => soundEngine.resume();
+    document.addEventListener("click", resumeAudio, { once: true });
+    return () => document.removeEventListener("click", resumeAudio);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-terminal-dark crt">
@@ -19,28 +35,28 @@ export function AppLayout() {
         <nav className="w-[200px] shrink-0 bg-terminal-bg t-border-r p-2 flex flex-col gap-1">
           <button
             className={`nav-btn ${activeTab === "chat" ? "active" : ""}`}
-            onClick={() => setActiveTab("chat")}
+            onClick={() => switchTab("chat")}
           >
             Communications<br />
             <span className="text-terminal-amber-dim text-[11px]">(Chat)</span>
           </button>
           <button
             className={`nav-btn ${activeTab === "files" ? "active" : ""}`}
-            onClick={() => setActiveTab("files")}
+            onClick={() => switchTab("files")}
           >
             Data Storage<br />
             <span className="text-terminal-amber-dim text-[11px]">(Files)</span>
           </button>
           <button
             className={`nav-btn ${activeTab === "logs" ? "active" : ""}`}
-            onClick={() => setActiveTab("logs")}
+            onClick={() => switchTab("logs")}
           >
             System Logs<br />
             <span className="text-terminal-amber-dim text-[11px]">(View)</span>
           </button>
           <button
             className={`nav-btn ${activeTab === "settings" ? "active" : ""}`}
-            onClick={() => setActiveTab("settings")}
+            onClick={() => switchTab("settings")}
           >
             Settings
           </button>
