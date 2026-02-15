@@ -5,9 +5,9 @@ import { ReplLogPanel } from "./ReplLogPanel";
 
 export function AppLayout() {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-cyber-deep scanlines relative">
       <Header />
-      <div className="flex-1 grid grid-cols-[260px_1fr_320px] overflow-hidden">
+      <div className="flex-1 grid grid-cols-[280px_1fr_340px] overflow-hidden gap-[1px] bg-cyber-cyan/10">
         <KBSidebar />
         <ChatPanel />
         <ReplLogPanel />
