@@ -4,22 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        cyber: {
-          deep: '#0a0a0f',
-          surface: '#0d0d1a',
-          panel: 'rgba(13, 13, 26, 0.85)',
-          cyan: '#00f0ff',
-          pink: '#ff2d6b',
-          purple: '#b829e3',
-          green: '#39ff14',
-          amber: '#ffb800',
-          muted: '#6b7294',
-          text: '#e0e0ff',
+        terminal: {
+          bg: '#1a1a0e',
+          surface: '#1e1e12',
+          border: '#5a5a2e',
+          amber: '#d4a017',
+          'amber-bright': '#ffb800',
+          'amber-dim': '#8a6a10',
+          'amber-faint': 'rgba(212, 160, 23, 0.15)',
+          dark: '#0f0f08',
         },
       },
       fontFamily: {
-        orbitron: ['Orbitron', 'sans-serif'],
-        mono: ['Share Tech Mono', 'monospace'],
+        mono: ['"Share Tech Mono"', 'monospace'],
       },
     },
   },

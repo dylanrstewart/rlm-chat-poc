@@ -26,7 +26,6 @@ export function ChatPanel() {
   const { connected, sendQuery, onReplStep, onAnswer, onError } =
     useWebSocket(currentSession?.id ?? null);
 
-  // Load sessions when user changes
   useEffect(() => {
     if (!currentUser) return;
     api.listSessions(currentUser.id).then((res) => {
@@ -36,7 +35,6 @@ export function ChatPanel() {
     });
   }, [currentUser]);
 
-  // Load messages when session changes
   useEffect(() => {
     if (!currentSession) {
       setMessages([]);
@@ -49,7 +47,15 @@ export function ChatPanel() {
     });
   }, [currentSession]);
 
-  // Set up WS callbacks
+  // Fallback: if WS answer is missed, refetch messages from API
+  const refetchMessages = useCallback(async () => {
+    if (!currentSession) return;
+    const res = await api.getMessages(currentSession.id);
+    if (res.success && res.data) {
+      setMessages(res.data as ChatMessage[]);
+    }
+  }, [currentSession]);
+
   useEffect(() => {
     onReplStep.current = (step: ReplStep) => {
       addReplStep(step);
@@ -65,12 +71,13 @@ export function ChatPanel() {
       });
       setIsLoading(false);
     };
-    onError.current = (_error: string) => {
+    onError.current = (error: string) => {
       setIsLoading(false);
+      // Refetch in case answer was persisted but WS send failed
+      refetchMessages();
     };
-  }, [currentSession]);
+  }, [currentSession, refetchMessages]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -93,7 +100,6 @@ export function ChatPanel() {
     clearReplSteps();
     setIsLoading(true);
 
-    // Add user message optimistically
     addMessage({
       id: crypto.randomUUID(),
       session_id: currentSession.id,
@@ -106,7 +112,6 @@ export function ChatPanel() {
     if (connected) {
       sendQuery(query, currentUser.id);
     } else {
-      // Fallback to REST
       const res = await api.sendQuery(currentSession.id, query);
       if (res.success && res.data) {
         addMessage({
@@ -122,97 +127,103 @@ export function ChatPanel() {
     }
   }, [input, currentSession, currentUser, connected, isLoading]);
 
+  const formatTime = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  };
+
   return (
-    <div className="flex flex-col h-full bg-cyber-deep/50">
-      {/* Session tabs */}
-      <div className="border-b border-cyber-cyan/20 px-3 py-2 flex items-center gap-2 overflow-x-auto bg-cyber-surface/50 backdrop-blur-sm">
+    <div className="flex flex-col h-full">
+      {/* Channel header + session tabs */}
+      <div className="t-border-b px-3 py-2 flex items-center gap-3">
+        <span className="text-xs text-terminal-amber-bright text-glow uppercase tracking-wider">
+          &gt; Communication Channel: RLM.NET
+        </span>
+        <div className="flex-1" />
         <button
-          className="text-xs px-3 py-1.5 bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/40 rounded hover:bg-cyber-pink/30 shrink-0 font-mono uppercase tracking-wider transition-all"
+          className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
           onClick={handleNewSession}
         >
-          + New Session
+          [+ New Chat]
         </button>
-        {chatSessions.map((s) => (
-          <button
-            key={s.id}
-            className={`text-xs px-3 py-1.5 rounded shrink-0 font-mono transition-all ${
-              currentSession?.id === s.id
-                ? "bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50 glow-cyan"
-                : "text-cyber-muted border border-transparent hover:border-cyber-cyan/20 hover:text-cyber-text"
-            }`}
-            onClick={() => setCurrentSession(s)}
-          >
-            {s.title ?? "Untitled"}
-          </button>
-        ))}
       </div>
 
+      {/* Session tabs */}
+      {chatSessions.length > 0 && (
+        <div className="t-border-b px-3 py-1 flex items-center gap-1 overflow-x-auto">
+          {chatSessions.map((s) => (
+            <button
+              key={s.id}
+              className={`text-xs px-2 py-0.5 font-mono uppercase shrink-0 ${
+                currentSession?.id === s.id
+                  ? "text-terminal-amber-bright bg-terminal-amber-faint t-border text-glow"
+                  : "text-terminal-amber-dim hover:text-terminal-amber"
+              }`}
+              onClick={() => setCurrentSession(s)}
+            >
+              {s.title ?? "Untitled"}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
         {!currentSession && (
-          <div className="text-center text-cyber-muted mt-20 font-mono">
-            <span className="text-glow-cyan text-cyber-cyan">&gt;</span> Initialize a new session to begin_
+          <div className="text-center text-terminal-amber-dim mt-20 text-xs">
+            &gt; CREATE A NEW CHAT SESSION TO BEGIN TRANSMISSION...
           </div>
         )}
         {messages
           .filter((m) => m.role !== "repl_log")
           .map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[80%] px-4 py-2.5 rounded text-sm font-mono ${
-                  msg.role === "user"
-                    ? "bg-cyber-pink/15 text-cyber-text border border-cyber-pink/30 cyber-clip"
-                    : "bg-cyber-surface border border-cyber-cyan/20 text-cyber-text"
-                }`}
-              >
-                {msg.role === "assistant" ? (
-                  <ReactMarkdown className="prose prose-sm prose-invert max-w-none prose-cyber">
+            <div key={msg.id} className="text-xs font-mono">
+              <span className="text-terminal-amber-dim">[{formatTime(msg.created_at)}]</span>{" "}
+              <span className={msg.role === "user" ? "text-terminal-amber-bright" : "text-terminal-amber"}>
+                {msg.role === "user" ? (currentUser?.username ?? "You") : "RLM_AI"}:
+              </span>{" "}
+              {msg.role === "assistant" ? (
+                <span className="inline">
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none inline prose-terminal"
+                    components={{
+                      p: ({ children }) => <span>{children} </span>,
+                    }}
+                  >
                     {msg.content}
                   </ReactMarkdown>
-                ) : (
-                  msg.content
-                )}
-              </div>
+                </span>
+              ) : (
+                <span>{msg.content}</span>
+              )}
             </div>
           ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-cyber-surface border border-cyber-cyan/30 px-4 py-2.5 rounded text-sm text-cyber-cyan font-mono animate-neon-pulse">
-              &gt; processing query...
-            </div>
+          <div className="text-xs font-mono text-terminal-amber-dim cursor-blink">
+            &gt; PROCESSING QUERY...
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="border-t border-cyber-cyan/20 p-3 bg-cyber-surface/50 backdrop-blur-sm">
-        <div className="flex gap-2">
-          <input
-            className="flex-1 px-4 py-2.5 bg-cyber-deep border border-cyber-cyan/30 rounded text-sm text-cyber-text font-mono focus:outline-none focus:border-cyber-cyan glow-cyan placeholder:text-cyber-muted transition-all"
-            placeholder={
-              currentSession
-                ? "> enter query..."
-                : "> no active session"
-            }
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-            disabled={!currentSession || isLoading}
-          />
-          <button
-            className="px-5 py-2.5 bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50 rounded text-sm font-mono uppercase tracking-wider hover:bg-cyber-cyan/30 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-            onClick={handleSend}
-            disabled={!currentSession || !input.trim() || isLoading}
-          >
-            Transmit
-          </button>
-        </div>
+      <div className="t-border-t px-3 py-2 flex items-center gap-2">
+        <span className="text-xs text-terminal-amber-bright text-glow shrink-0">&gt; TRANSMIT MESSAGE:</span>
+        <input
+          className="flex-1 bg-transparent text-terminal-amber text-xs font-mono outline-none placeholder-terminal-amber-dim"
+          placeholder={currentSession ? "Type message..." : "No active session"}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+          disabled={!currentSession || isLoading}
+        />
+        <button
+          className="text-xs px-3 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase disabled:opacity-30"
+          onClick={handleSend}
+          disabled={!currentSession || !input.trim() || isLoading}
+        >
+          [Send]
+        </button>
       </div>
     </div>
   );

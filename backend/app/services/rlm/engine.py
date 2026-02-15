@@ -1,11 +1,14 @@
 import contextlib
 import io
+import logging
 import re
 from typing import Any, Callable
 
 from openai import AsyncOpenAI
 
 from app.services.rlm.prompts import build_system_prompt
+
+logger = logging.getLogger(__name__)
 
 
 class RLMEngine:
@@ -37,7 +40,7 @@ class RLMEngine:
 
         def llm_query(prompt: str, ctx: str = "") -> str:
             """Sub-LM call available inside the REPL."""
-            import asyncio
+            from app.services.rlm.tools import _run_async
 
             async def _call():
                 content = f"{prompt}\n\nContext:\n{ctx}" if ctx else prompt
@@ -45,23 +48,15 @@ class RLMEngine:
                 response = await self.client.chat.completions.create(
                     model=self.sub_model,
                     messages=messages,
-                    max_completion_tokens=2000,
+                    max_completion_tokens=8000,
                 )
-                return response.choices[0].message.content
+                result = response.choices[0].message.content
+                if not result:
+                    logger.warning("llm_query returned empty content")
+                    return "(No response from sub-model)"
+                return result
 
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
-
-            if loop and loop.is_running():
-                new_loop = asyncio.new_event_loop()
-                try:
-                    return new_loop.run_until_complete(_call())
-                finally:
-                    new_loop.close()
-            else:
-                return asyncio.run(_call())
+            return _run_async(_call())
 
         # Inject into namespace
         repl_globals["context"] = context
@@ -123,17 +118,21 @@ class RLMEngine:
                 })
 
                 if final_answer["value"] is not None:
+                    logger.info(f"SUBMIT called at iteration {iteration + 1}, answer length: {len(final_answer['value'])}")
                     return final_answer["value"]
             else:
-                # No code block — check for inline SUBMIT
+                # No code block — check for inline SUBMIT with quoted string content
                 if "SUBMIT" in assistant_msg:
-                    match = re.search(r'SUBMIT\(["\']?(.*?)["\']?\)', assistant_msg, re.DOTALL)
+                    match = re.search(r'SUBMIT\(["\'](.+?)["\']\)', assistant_msg, re.DOTALL)
                     if match:
+                        logger.info(f"Inline SUBMIT found at iteration {iteration + 1}")
                         return match.group(1)
 
-                # Treat as final answer
+                # Treat full message as final answer
+                logger.info(f"No code block at iteration {iteration + 1}, treating as final answer")
                 return assistant_msg
 
+        logger.warning("Max iterations reached without a final answer")
         return "Max iterations reached without a final answer."
 
     def _extract_code(self, response: str) -> str | None:

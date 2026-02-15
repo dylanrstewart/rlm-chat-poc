@@ -1,4 +1,5 @@
 import json
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
@@ -13,6 +14,8 @@ from app.schemas.common import ApiResponse
 from app.services.milvus_service import MilvusService
 from app.services.rlm.engine import RLMEngine
 from app.services.rlm.session import session_manager
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -120,6 +123,11 @@ async def websocket_chat(websocket: WebSocket, session_id: UUID):
     try:
         while True:
             data = await websocket.receive_json()
+
+            # Ignore keepalive pings
+            if data.get("type") == "ping":
+                continue
+
             query = data.get("query", "")
             user_id = data.get("user_id", "")
 
@@ -127,38 +135,55 @@ async def websocket_chat(websocket: WebSocket, session_id: UUID):
                 await websocket.send_json({"type": "error", "content": "Missing query or user_id"})
                 continue
 
-            async with get_db_session() as db:
-                msg_repo = ChatMessageRepository(db)
-                await msg_repo.create(session_id=session_id, role="user", content=query)
+            try:
+                async with get_db_session() as db:
+                    msg_repo = ChatMessageRepository(db)
+                    await msg_repo.create(session_id=session_id, role="user", content=query)
 
-                milvus = MilvusService()
-                rlm_session = await session_manager.get_or_create(user_id, db, milvus)
+                    milvus = MilvusService()
+                    rlm_session = await session_manager.get_or_create(user_id, db, milvus)
 
-                client = _get_openai_client()
-                engine = RLMEngine(
-                    client=client,
-                    model=settings.llm_model,
-                    sub_model=settings.llm_sub_model,
-                )
+                    client = _get_openai_client()
+                    engine = RLMEngine(
+                        client=client,
+                        model=settings.llm_model,
+                        sub_model=settings.llm_sub_model,
+                    )
 
-                async def on_step(step):
-                    await websocket.send_json({"type": "repl_step", **step})
+                    async def on_step(step):
+                        try:
+                            await websocket.send_json({"type": "repl_step", **step})
+                        except Exception as e:
+                            logger.error(f"Failed to send repl_step: {e}")
 
-                answer = await engine.run(
-                    query=query,
-                    context="",
-                    tools=rlm_session.tools,
-                    tool_prompt=rlm_session.tool_descriptions,
-                    on_repl_step=on_step,
-                )
+                    answer = await engine.run(
+                        query=query,
+                        context="",
+                        tools=rlm_session.tools,
+                        tool_prompt=rlm_session.tool_descriptions,
+                        on_repl_step=on_step,
+                    )
 
-                await msg_repo.create(session_id=session_id, role="assistant", content=answer)
-                await db.commit()
+                    logger.info(f"RLM engine returned answer ({len(answer)} chars)")
 
-                await websocket.send_json({"type": "answer", "content": answer})
+                    # Persist answer to DB first (so it survives WS failures)
+                    await msg_repo.create(session_id=session_id, role="assistant", content=answer)
+                    await db.commit()
+
+                    await websocket.send_json({"type": "answer", "content": answer})
+                    logger.info("Answer sent via WebSocket")
+
+            except WebSocketDisconnect:
+                raise
+            except Exception as e:
+                logger.exception(f"Error during RLM query: {e}")
+                try:
+                    await websocket.send_json({"type": "error", "content": str(e)})
+                except Exception:
+                    pass
 
     except WebSocketDisconnect:
-        pass
+        logger.info(f"WebSocket disconnected for session {session_id}")
 
 
 def get_db_session():

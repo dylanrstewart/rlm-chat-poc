@@ -46,8 +46,18 @@ export function useWebSocket(sessionId: string | null) {
       }
     };
 
+    // Keepalive ping every 30s to prevent proxy/network timeout
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 30000);
+
     wsRef.current = ws;
-    return () => ws.close();
+    return () => {
+      clearInterval(pingInterval);
+      ws.close();
+    };
   }, [sessionId]);
 
   const sendQuery = useCallback(

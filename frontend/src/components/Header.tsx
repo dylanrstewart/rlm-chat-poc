@@ -32,58 +32,57 @@ export function Header() {
   };
 
   return (
-    <header className="bg-cyber-surface border-b border-cyber-cyan/30 px-5 py-3 flex items-center justify-between relative">
-      {/* Bottom gradient accent line */}
-      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-cyber-cyan via-cyber-pink to-cyber-purple" />
-
-      <h1 className="font-orbitron text-lg font-bold tracking-widest text-cyber-cyan text-glow-cyan uppercase">
-        RLM Chat
+    <header className="bg-terminal-dark t-border-b px-4 py-2 flex items-center justify-between">
+      <h1 className="text-sm uppercase tracking-[3px] text-terminal-amber-bright text-glow font-mono">
+        RobCo Unified Operating System V.2201 — RLM Terminal
       </h1>
-
       <div className="flex items-center gap-3">
         {showCreate ? (
           <div className="flex items-center gap-2">
+            <span className="text-xs text-terminal-amber-dim">&gt;</span>
             <input
-              className="px-3 py-1.5 rounded bg-cyber-deep text-cyber-text text-sm border border-cyber-cyan/40 focus:border-cyber-cyan focus:outline-none glow-cyan font-mono placeholder:text-cyber-muted"
-              placeholder="// enter_username"
+              className="px-2 py-1 bg-terminal-dark text-terminal-amber text-xs font-mono t-border outline-none focus:border-terminal-amber"
+              placeholder="ENTER USERNAME"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
+              autoFocus
             />
             <button
-              className="text-sm px-3 py-1.5 bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50 rounded hover:bg-cyber-cyan/30 font-mono uppercase tracking-wider transition-all"
+              className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={handleCreateUser}
             >
-              Create
+              [Create]
             </button>
             <button
-              className="text-sm px-3 py-1.5 bg-cyber-pink/10 text-cyber-pink border border-cyber-pink/30 rounded hover:bg-cyber-pink/20 font-mono uppercase tracking-wider transition-all"
+              className="text-xs px-2 py-1 t-border text-terminal-amber-dim hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={() => setShowCreate(false)}
             >
-              Abort
+              [Cancel]
             </button>
           </div>
         ) : (
           <>
             <select
-              className="bg-cyber-deep text-cyber-text text-sm px-3 py-1.5 rounded border border-cyber-cyan/30 focus:border-cyber-cyan focus:outline-none font-mono cursor-pointer"
+              className="bg-terminal-dark text-terminal-amber text-xs px-2 py-1 font-mono t-border outline-none cursor-pointer"
               value={currentUser?.id ?? ""}
               onChange={(e) => {
                 const user = users.find((u) => u.id === e.target.value);
                 setCurrentUser(user ?? null);
               }}
             >
+              {users.length === 0 && <option value="">NO USERS</option>}
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.username}
+                  {u.username.toUpperCase()}
                 </option>
               ))}
             </select>
             <button
-              className="text-sm px-3 py-1.5 border border-cyber-cyan/30 text-cyber-cyan rounded hover:bg-cyber-cyan/10 hover:border-cyber-cyan font-mono uppercase tracking-wider transition-all"
+              className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={() => setShowCreate(true)}
             >
-              + User
+              [+ User]
             </button>
           </>
         )}

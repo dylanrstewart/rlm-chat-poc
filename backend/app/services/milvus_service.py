@@ -74,14 +74,18 @@ class MilvusService:
             for hit in results[0]
         ]
 
+    def load_collection(self, collection_name: str) -> None:
+        self.client.load_collection(collection_name=collection_name)
+
     def query_all(
         self,
         collection_name: str,
         output_fields: list[str] | None = None,
-        limit: int = 100000,
+        limit: int = 16384,
     ) -> list[dict]:
         if output_fields is None:
             output_fields = ["id", "text", "vector"]
+        self.client.load_collection(collection_name=collection_name)
         return self.client.query(
             collection_name=collection_name,
             filter="",

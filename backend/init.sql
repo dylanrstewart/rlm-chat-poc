@@ -47,7 +47,7 @@ CREATE TABLE collection_topics (
     topic_label VARCHAR NOT NULL,
     topic_id INT NOT NULL,
     doc_count INT DEFAULT 0,
-    sample_keywords TEXT[],
+    sample_keywords JSONB,
     parent_topic_id UUID REFERENCES collection_topics(id),
     updated_at TIMESTAMP DEFAULT NOW()
 );

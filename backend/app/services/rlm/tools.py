@@ -1,25 +1,34 @@
 import asyncio
 from uuid import UUID
 
+import nest_asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.milvus_service import MilvusService
 
+_nest_applied = False
+
 
 def _run_async(coro):
-    """Run an async coroutine from sync context (inside exec())."""
+    """Run an async coroutine from sync context (inside exec()).
+
+    nest_asyncio patches the running loop to allow re-entrant calls,
+    so we can simply use loop.run_until_complete() from within exec().
+    Applied lazily to avoid patching before the loop is created.
+    """
+    global _nest_applied
+
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
         loop = None
 
     if loop and loop.is_running():
-        new_loop = asyncio.new_event_loop()
-        try:
-            return new_loop.run_until_complete(coro)
-        finally:
-            new_loop.close()
+        if not _nest_applied:
+            nest_asyncio.apply(loop)
+            _nest_applied = True
+        return loop.run_until_complete(coro)
     else:
         return asyncio.run(coro)
 
