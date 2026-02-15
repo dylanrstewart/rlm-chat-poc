@@ -29,26 +29,26 @@ export function FilePanel() {
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-2 t-border-b">
-        <span className="text-xs text-terminal-amber-bright text-glow uppercase tracking-wider">
+        <span className="text-sm text-terminal-amber-bright text-glow uppercase tracking-wider">
           &gt; Data File Explorer
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
         {!selectedKB && (
-          <p className="text-xs text-terminal-amber-dim font-mono mt-4">
+          <p className="text-sm text-terminal-amber-dim font-mono mt-4">
             &gt; SELECT A VAULT TO VIEW FILES
           </p>
         )}
         {selectedKB && files.length === 0 && (
-          <p className="text-xs text-terminal-amber-dim font-mono mt-4">
+          <p className="text-sm text-terminal-amber-dim font-mono mt-4">
             &gt; VAULT EMPTY. UPLOAD FILES BELOW.
           </p>
         )}
         {files.map((f) => (
           <div
             key={f.id}
-            className="flex items-center justify-between text-xs font-mono py-1 group hover:bg-terminal-amber-faint px-1"
+            className="flex items-center justify-between text-sm font-mono py-1 group hover:bg-terminal-amber-faint px-1"
           >
             <span className="text-terminal-amber truncate uppercase">
               {f.filename}
@@ -68,7 +68,7 @@ export function FilePanel() {
 
       {selectedKB && (
         <div className="px-3 py-2 t-border-t space-y-1">
-          <label className="block w-full text-xs py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono cursor-pointer uppercase text-center">
+          <label className="block w-full text-sm py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono cursor-pointer uppercase text-center">
             {uploading ? "Uploading..." : "[Upload File]"}
             <input
               type="file"

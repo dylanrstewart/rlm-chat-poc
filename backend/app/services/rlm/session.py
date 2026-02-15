@@ -28,10 +28,8 @@ class SessionManager:
         db: AsyncSession,
         milvus: MilvusService,
     ) -> RLMSession:
-        if user_id in self.sessions:
-            self.sessions[user_id].last_used = datetime.utcnow()
-            return self.sessions[user_id]
-
+        # Always recreate tools with the current DB session —
+        # cached sessions hold a stale/closed session from a previous request.
         kb_repo = KnowledgeBaseRepository(db)
         kbs = await kb_repo.find_by_user(user_id)
 

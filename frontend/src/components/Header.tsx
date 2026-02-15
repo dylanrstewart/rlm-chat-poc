@@ -33,15 +33,15 @@ export function Header() {
 
   return (
     <header className="bg-terminal-dark t-border-b px-4 py-2 flex items-center justify-between">
-      <h1 className="text-sm uppercase tracking-[3px] text-terminal-amber-bright text-glow font-mono">
+      <h1 className="text-base uppercase tracking-[3px] text-terminal-amber-bright text-glow font-mono">
         RobCo Unified Operating System V.2201 — RLM Terminal
       </h1>
       <div className="flex items-center gap-3">
         {showCreate ? (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-terminal-amber-dim">&gt;</span>
+            <span className="text-sm text-terminal-amber-dim">&gt;</span>
             <input
-              className="px-2 py-1 bg-terminal-dark text-terminal-amber text-xs font-mono t-border outline-none focus:border-terminal-amber"
+              className="px-2 py-1 bg-terminal-dark text-terminal-amber text-sm font-mono t-border outline-none focus:border-terminal-amber"
               placeholder="ENTER USERNAME"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
@@ -49,13 +49,13 @@ export function Header() {
               autoFocus
             />
             <button
-              className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
+              className="text-sm px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={handleCreateUser}
             >
               [Create]
             </button>
             <button
-              className="text-xs px-2 py-1 t-border text-terminal-amber-dim hover:bg-terminal-amber-faint font-mono uppercase"
+              className="text-sm px-2 py-1 t-border text-terminal-amber-dim hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={() => setShowCreate(false)}
             >
               [Cancel]
@@ -64,7 +64,7 @@ export function Header() {
         ) : (
           <>
             <select
-              className="bg-terminal-dark text-terminal-amber text-xs px-2 py-1 font-mono t-border outline-none cursor-pointer"
+              className="bg-terminal-dark text-terminal-amber text-sm px-2 py-1 font-mono t-border outline-none cursor-pointer"
               value={currentUser?.id ?? ""}
               onChange={(e) => {
                 const user = users.find((u) => u.id === e.target.value);
@@ -79,7 +79,7 @@ export function Header() {
               ))}
             </select>
             <button
-              className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
+              className="text-sm px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
               onClick={() => setShowCreate(true)}
             >
               [+ User]

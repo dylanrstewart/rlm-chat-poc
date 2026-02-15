@@ -136,12 +136,12 @@ export function ChatPanel() {
     <div className="flex flex-col h-full">
       {/* Channel header + session tabs */}
       <div className="t-border-b px-3 py-2 flex items-center gap-3">
-        <span className="text-xs text-terminal-amber-bright text-glow uppercase tracking-wider">
+        <span className="text-sm text-terminal-amber-bright text-glow uppercase tracking-wider">
           &gt; Communication Channel: RLM.NET
         </span>
         <div className="flex-1" />
         <button
-          className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
+          className="text-sm px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
           onClick={handleNewSession}
         >
           [+ New Chat]
@@ -154,7 +154,7 @@ export function ChatPanel() {
           {chatSessions.map((s) => (
             <button
               key={s.id}
-              className={`text-xs px-2 py-0.5 font-mono uppercase shrink-0 ${
+              className={`text-sm px-2 py-0.5 font-mono uppercase shrink-0 ${
                 currentSession?.id === s.id
                   ? "text-terminal-amber-bright bg-terminal-amber-faint t-border text-glow"
                   : "text-terminal-amber-dim hover:text-terminal-amber"
@@ -170,14 +170,14 @@ export function ChatPanel() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
         {!currentSession && (
-          <div className="text-center text-terminal-amber-dim mt-20 text-xs">
+          <div className="text-center text-terminal-amber-dim mt-20 text-sm">
             &gt; CREATE A NEW CHAT SESSION TO BEGIN TRANSMISSION...
           </div>
         )}
         {messages
           .filter((m) => m.role !== "repl_log")
           .map((msg) => (
-            <div key={msg.id} className="text-xs font-mono">
+            <div key={msg.id} className="text-sm font-mono">
               <span className="text-terminal-amber-dim">[{formatTime(msg.created_at)}]</span>{" "}
               <span className={msg.role === "user" ? "text-terminal-amber-bright" : "text-terminal-amber"}>
                 {msg.role === "user" ? (currentUser?.username ?? "You") : "RLM_AI"}:
@@ -199,7 +199,7 @@ export function ChatPanel() {
             </div>
           ))}
         {isLoading && (
-          <div className="text-xs font-mono text-terminal-amber-dim cursor-blink">
+          <div className="text-sm font-mono text-terminal-amber-dim cursor-blink">
             &gt; PROCESSING QUERY...
           </div>
         )}
@@ -208,9 +208,9 @@ export function ChatPanel() {
 
       {/* Input */}
       <div className="t-border-t px-3 py-2 flex items-center gap-2">
-        <span className="text-xs text-terminal-amber-bright text-glow shrink-0">&gt; TRANSMIT MESSAGE:</span>
+        <span className="text-sm text-terminal-amber-bright text-glow shrink-0">&gt; TRANSMIT MESSAGE:</span>
         <input
-          className="flex-1 bg-transparent text-terminal-amber text-xs font-mono outline-none placeholder-terminal-amber-dim"
+          className="flex-1 bg-transparent text-terminal-amber text-sm font-mono outline-none placeholder-terminal-amber-dim"
           placeholder={currentSession ? "Type message..." : "No active session"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -218,7 +218,7 @@ export function ChatPanel() {
           disabled={!currentSession || isLoading}
         />
         <button
-          className="text-xs px-3 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase disabled:opacity-30"
+          className="text-sm px-3 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase disabled:opacity-30"
           onClick={handleSend}
           disabled={!currentSession || !input.trim() || isLoading}
         >

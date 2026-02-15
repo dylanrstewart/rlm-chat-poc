@@ -91,11 +91,11 @@ export function KBSidebar() {
   return (
     <div className="flex flex-col h-full p-3 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-terminal-amber-bright text-glow uppercase tracking-wider">
+        <span className="text-sm text-terminal-amber-bright text-glow uppercase tracking-wider">
           &gt; Data Storage Vaults
         </span>
         <button
-          className="text-xs px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
+          className="text-sm px-2 py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
           onClick={() => setShowCreate(!showCreate)}
         >
           [+ New Vault]
@@ -105,19 +105,19 @@ export function KBSidebar() {
       {showCreate && (
         <div className="space-y-2 t-border p-2">
           <input
-            className="w-full px-2 py-1 bg-terminal-dark text-terminal-amber text-xs font-mono t-border outline-none focus:border-terminal-amber"
+            className="w-full px-2 py-1 bg-terminal-dark text-terminal-amber text-sm font-mono t-border outline-none focus:border-terminal-amber"
             placeholder="VAULT NAME"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <input
-            className="w-full px-2 py-1 bg-terminal-dark text-terminal-amber text-xs font-mono t-border outline-none focus:border-terminal-amber"
+            className="w-full px-2 py-1 bg-terminal-dark text-terminal-amber text-sm font-mono t-border outline-none focus:border-terminal-amber"
             placeholder="DESCRIPTION (OPTIONAL)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
           <button
-            className="w-full text-xs py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
+            className="w-full text-sm py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase"
             onClick={handleCreate}
           >
             [Initialize Vault]
@@ -127,7 +127,7 @@ export function KBSidebar() {
 
       <div className="flex-1 overflow-y-auto space-y-1">
         {knowledgeBases.length === 0 && (
-          <p className="text-xs text-terminal-amber-dim text-center mt-4">
+          <p className="text-sm text-terminal-amber-dim text-center mt-4">
             &gt; NO VAULTS FOUND. CREATE ONE TO BEGIN.
           </p>
         )}
@@ -136,7 +136,7 @@ export function KBSidebar() {
           return (
             <div
               key={kb.id}
-              className={`p-2 cursor-pointer text-xs font-mono group t-border ${
+              className={`p-2 cursor-pointer text-sm font-mono group t-border ${
                 isSelected
                   ? "bg-terminal-amber-faint border-terminal-amber text-glow"
                   : "hover:bg-terminal-amber-faint"
@@ -165,7 +165,7 @@ export function KBSidebar() {
                   </div>
 
                   <button
-                    className="w-full text-xs py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase disabled:opacity-30"
+                    className="w-full text-sm py-1 t-border text-terminal-amber hover:bg-terminal-amber-faint font-mono uppercase disabled:opacity-30"
                     onClick={handleCluster}
                     disabled={clustering || files.length === 0}
                   >
@@ -177,7 +177,7 @@ export function KBSidebar() {
                       {topics.map((t) => (
                         <span
                           key={t.id}
-                          className="text-xs font-mono bg-terminal-dark text-terminal-amber-bright px-1.5 py-0.5 t-border"
+                          className="text-sm font-mono bg-terminal-dark text-terminal-amber-bright px-1.5 py-0.5 t-border"
                         >
                           {t.topic_label} ({t.doc_count})
                         </span>

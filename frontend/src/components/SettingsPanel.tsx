@@ -6,12 +6,12 @@ export function SettingsPanel() {
   return (
     <div className="flex flex-col h-full p-3">
       <div className="mb-4">
-        <span className="text-xs text-terminal-amber-bright text-glow uppercase tracking-wider">
+        <span className="text-sm text-terminal-amber-bright text-glow uppercase tracking-wider">
           &gt; Terminal Settings
         </span>
       </div>
 
-      <div className="space-y-3 text-xs font-mono">
+      <div className="space-y-3 text-sm font-mono">
         <div className="t-border p-3 space-y-2">
           <div className="text-terminal-amber-bright uppercase">User Profile</div>
           <div className="text-terminal-amber-dim">
